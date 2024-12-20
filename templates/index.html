@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pollution Data Visualization</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            display: flex;
+            justify-content: flex-end;
+            padding: 14px 16px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 16px;
+        }
+
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        
+        .page {
+            padding: 20px;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+
+ 
+        #loading {
+            display: none;
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#" id="home-link" aria-label="Navigate to Home Page">Home</a>
+        <div class="dropdown">
+            <a href="#" class="dropdown-btn" aria-label="Open Graph Options">Graphs</a>
+            <div class="dropdown-content">
+                <a href="#" id="show-graph-1">Pollution Trends</a>
+                <a href="#" id="show-graph-2">Country Comparison</a>
+            </div>
+        </div>
+        <a href="#" id="help-link" aria-label="Get Help">Help</a>
+    </div>
+
+    
+    <div id="intro-page" class="page">
+        <h1>Welcome to Pollution Data Visualization</h1>
+        <p>This website allows you to visualize pollution data across different European countries.</p>
+        <h2>Available Visualizations:</h2>
+        <ul>
+            <li>Pollution Trends in a Country - View how pollution levels changed over time</li>
+            <li>Country Comparison - Compare pollution levels across countries for a specific year</li>
+        </ul>
+    </div>
+
+    
+    <div id="graph-page" class="page" style="display: none;">
+        <h1>Graph Visualization</h1>
+        <div id="loading">Loading...</div>
+        <div id="controls-1" class="controls" style="display: none;">
+            <h2>Pollution Trends in a Country</h2>
+            <label for="pollutant-1">Pollutant:</label>
+            <select id="pollutant-1">
+                <option value="PM2.5">PM2.5</option>
+                <option value="NO2">NO2</option>
+                <option value="O3">O3</option>
+            </select>
+
+            <label for="country-1">Country:</label>
+            <select id="country-1">
+                <option value="Luxembourg">Luxembourg</option>
+                <option value="Germany">Germany</option>
+                <option value="France">France</option>
+                <option value="Italy">Italy</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Poland">Poland</option>
+                <option value="Spain">Spain</option>
+            </select>
+            <h3>Select Graph Type:</h3>
+    <label><input type="radio" name="graph-type-1" value="line" checked> Line</label>
+    <label><input type="radio" name="graph-type-1" value="bar"> Bar</label>
+    
+            <button id="submit-1">Generate Graph</button>
+        </div>
+        <div id="controls-2" class="controls" style="display: none;">
+            <h2>Country Comparison for a Pollutant</h2>
+            <label for="pollutant-2">Pollutant:</label>
+            <select id="pollutant-2">
+                <option value="PM2.5">PM2.5</option>
+                <option value="NO2">NO2</option>
+                <option value="O3">O3</option>
+            </select>
+
+            <label for="year-2">Year:</label>
+            <select id="year-2">
+                <option value="2014">2014</option>
+                <option value="2015">2015</option>
+                <option value="2016">2016</option>
+                <option value="2017">2017</option>
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+            </select>
+
+            <h3>Select Graph Type:</h3>
+            <label><input type="radio" name="graph-type-2" value="line"> Line</label>
+            <label><input type="radio" name="graph-type-2" value="bar" checked> Bar</label>
+            
+
+            <button id="submit-2">Generate Graph</button>
+        </div>
+        <canvas id="pollution-chart" width="400" height="200" style="display: none;">
+            Your browser does not support canvas. Please upgrade to view the chart.
+        </canvas>
+    </div>
+    <script>
+        function showPage(pageId) {
+            $('.page').hide(); 
+            $(`#${pageId}`).show();  
+        }
+
+        
+        $('#home-link').on('click', function () {
+            showPage('intro-page'); 
+        });
+
+        $('.dropdown-content a').on('click', function () {
+            showPage('graph-page'); 
+            $('.controls').hide(); 
+            $('#pollution-chart').hide(); 
+        });
+
+        $('#show-graph-1').on('click', function () {
+            $('.controls').hide(); 
+            $('#controls-1').show(); 
+        });
+
+        $('#show-graph-2').on('click', function () {
+            $('.controls').hide(); 
+            $('#controls-2').show(); 
+        });
+
+function renderGraph(labels, data, title, type) {
+    const ctx = document.getElementById('pollution-chart').getContext('2d');
+    $('#pollution-chart').show(); 
+
+    
+    if (window.myChart) {
+        window.myChart.destroy();
+    }
+
+    
+    window.myChart = new Chart(ctx, {
+        type: type, 
+        data: {
+            labels: labels,
+            datasets: [{
+                label: title,
+                data: data,
+                backgroundColor: type === 'bar' ? 'rgba(54, 162, 235, 0.2)' : 'transparent',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                pointBackgroundColor: type === 'scatter' ? 'rgba(255, 99, 132, 1)' : null,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { beginAtZero: true },
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+$('#submit-1').on('click', function () {
+    const pollutant = $('#pollutant-1').val();
+    const country = $('#country-1').val();
+    const graphType = $('input[name="graph-type-1"]:checked').val();
+
+    $.ajax({
+        url: '/get_pollution_trends',
+        method: 'GET',
+        data: { pollutant, country },
+        success: function (response) {
+            if (response.years.length && response.values.length) {
+                renderGraph(response.years, response.values, 'Pollution Trends', graphType);
+            } else {
+                alert('No data available for the selected criteria.');
+            }
+        },
+        error: function () {
+            alert('Error fetching data. Please try again.');
+        }
+    });
+});
+
+
+$('#submit-2').on('click', function () {
+    const pollutant = $('#pollutant-2').val();
+    const year = $('#year-2').val();
+    const graphType = $('input[name="graph-type-2"]:checked').val();
+
+    $.ajax({
+        url: '/get_country_comparison',
+        method: 'GET',
+        data: { pollutant, year },
+        success: function (response) {
+            if (response.countries.length && response.values.length) {
+                renderGraph(response.countries, response.values, 'Country Comparison', graphType);
+            } else {
+                alert('No data available for the selected criteria.');
+            }
+        },
+        error: function () {
+            alert('Error fetching data. Please try again.');
+        }
+    });
+});
+        $('#help-link').on('click', function () {
+            alert('For assistance, please contact support@example.com');
+        });
+        showPage('intro-page');
+    </script>
+</body>
+</html>
+
+
