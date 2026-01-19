@@ -21,3 +21,17 @@ decisions in reducing pollution’s on public health and ecosystems. By making t
 constant efforts to improve environmental quality and promote
 sustainable development across the EU.
 Keywords: NO2, O3, PM2.5, air pollutant
+
+
+
+## How to Run the Application
+
+Make sure Python 3.8 or newer is installed on your system. Clone the repository and navigate into the project directory. (Optional) Create and activate a virtual environment using `python -m venv venv`, then activate it with `venv\Scripts\activate` on Windows or `source venv/bin/activate` on macOS/Linux. Install Flask using `pip install flask`. Run the application with `python Flask.py` (or `python3 Flask.py`). Once the server starts, open your browser and go to `http://...` to view the application.
+
+## Notes
+
+Flask automatically searches for HTML templates inside the `templates` directory. The file name `Flask.py` is valid but not standard practice; in larger projects it is usually renamed to `app.py`. This project is intended as a basic learning example of Flask.
+
+## Author
+
+Karyna Ouahrani
